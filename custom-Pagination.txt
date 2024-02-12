@@ -1,0 +1,101 @@
+import React from 'react';
+import { Select, MenuItem, TablePagination } from '@mui/material';
+
+const CustomPagination = ({ rowCount, pageSize, page, onPageChange, onPageSizeChange, daysOptions, selectedDays, onDaysChange }) => {
+  return (
+    <TablePagination
+      rowsPerPageOptions={[]} // Remove the default page size options
+      count={rowCount}
+      page={page}
+      onPageChange={onPageChange}
+      component="div"
+      labelRowsPerPage=""
+      ActionsComponent={() => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span>Load data for the last </span>
+          <Select value={selectedDays} onChange={(e) => onDaysChange(e.target.value)}>
+            {daysOptions.map((days) => (
+              <MenuItem key={days} value={days}>
+                {days} days
+              </MenuItem>
+            ))}
+          </Select>
+          <span> | </span>
+          <span>Rows per page: {pageSize}</span>
+        </div>
+      )}
+    />
+  );
+};
+
+export default CustomPagination;
+
+
+import React, { useState } from 'react';
+import { DataGrid } from '@mui/x-data-grid';
+import CustomPagination from './CustomPagination';
+
+const YourDataGridComponent = () => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedDays, setSelectedDays] = useState(7); // Default to 7 days
+  const daysOptions = [7, 14, 30]; // Options for the user to select from
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    // Fetch data for the new page and selected days
+    fetchData(newPage, pageSize, selectedDays);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newPageSize) => {
+    setPageSize(newPageSize);
+    // Fetch data for the current page and selected days with the new page size
+    fetchData(page, newPageSize, selectedDays);
+  };
+
+  // Handle selected days change
+  const handleDaysChange = (newDays) => {
+    setSelectedDays(newDays);
+    // Fetch data for the current page and new selected days
+    fetchData(page, pageSize, newDays);
+  };
+
+  // Function to fetch data based on page, page size, and selected days
+  const fetchData = (currentPage, currentPageSize, currentSelectedDays) => {
+    // Implement your data fetching logic here using the new parameters
+    // Update the DataGrid data with the fetched data
+  };
+
+  // Dummy data for demonstration
+  const rows = [...];
+
+  return (
+    <div style={{ height: 400, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={[...]} // Define your columns
+        pagination
+        pageSize={pageSize}
+        page={page}
+        components={{
+          Pagination: () => (
+            <CustomPagination
+              rowCount={rows.length}
+              pageSize={pageSize}
+              page={page}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              daysOptions={daysOptions}
+              selectedDays={selectedDays}
+              onDaysChange={handleDaysChange}
+            />
+          ),
+        }}
+      />
+    </div>
+  );
+};
+
+export default YourDataGridComponent;
