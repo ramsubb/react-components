@@ -1,0 +1,55 @@
+// ParentComponent.js
+import React, { useState } from 'react';
+import ComponentA from './ComponentA';
+import ComponentB from './ComponentB';
+
+const ParentComponent = () => {
+  const [dataFromA, setDataFromA] = useState('Hello from Component A');
+
+  // Define a function to update the state in ParentComponent
+  const updateDataFromA = (newData) => {
+    setDataFromA(newData);
+  };
+
+  return (
+    <div>
+      {/* Pass dataFromA and the update function as props to ComponentA */}
+      <ComponentA dataFromA={dataFromA} updateDataFromA={updateDataFromA} />
+
+      {/* Pass dataFromA to ComponentB */}
+      <ComponentB dataFromA={dataFromA} />
+    </div>
+  );
+};
+
+export default ParentComponent;
+
+
+// ComponentA.js
+import React from 'react';
+
+const ComponentA = ({ dataFromA, updateDataFromA }) => {
+  return (
+    <div>
+      <p>{dataFromA}</p>
+      <button onClick={() => updateDataFromA('Updated data from Component A')}>Update Data</button>
+    </div>
+  );
+};
+
+export default ComponentA;
+
+
+// ComponentA.js
+import React from 'react';
+
+const ComponentA = ({ dataFromA, updateDataFromA }) => {
+  return (
+    <div>
+      <p>{dataFromA}</p>
+      <button onClick={() => updateDataFromA('Updated data from Component A')}>Update Data</button>
+    </div>
+  );
+};
+
+export default ComponentA;
