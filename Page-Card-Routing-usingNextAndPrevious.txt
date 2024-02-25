@@ -1,0 +1,101 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
+
+const Card = ({ cardName, cardContent }) => (
+  <div style={{ border: '1px solid #ddd', padding: '10px', margin: '10px', borderRadius: '8px' }}>
+    <h1>{cardName}</h1>
+    <p>{cardContent}</p>
+  </div>
+);
+
+const CardList = [
+  { name: 'Card1', content: 'Content for Card1' },
+  { name: 'Card2', content: 'Content for Card2' },
+  { name: 'Card3', content: 'Content for Card3' },
+  { name: 'Card4', content: 'Content for Card4' },
+];
+
+const App = () => {
+  return (
+    <Router>
+      <nav>
+        <ul>
+          {CardList.map((card, index) => (
+            <li key={index}>
+              <Link to={`/card/${index + 1}`}>{card.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <Switch>
+        {CardList.map((card, index) => (
+          <Route key={index} path={`/card/${index + 1}`}>
+            <Card cardName={card.name} cardContent={card.content} />
+            <div>
+              {index > 0 && (
+                <Link to={`/card/${index}`}>&lt; Previous</Link>
+              )}
+              {index < CardList.length - 1 && (
+                <Link to={`/card/${index + 2}`}>Next &gt;</Link>
+              )}
+            </div>
+          </Route>
+        ))}
+        <Route path="/">
+          <h1>Welcome to the App</h1>
+        </Route>
+      </Switch>
+    </Router>
+  );
+};
+
+export default App;
+
+
+
+import React from 'react';
+
+const Card = ({ cardName, cardContent }) => (
+  <div style={{ border: '1px solid #ddd', padding: '10px', margin: '10px', borderRadius: '8px' }}>
+    <h1>{cardName}</h1>
+    <p>{cardContent}</p>
+  </div>
+);
+
+export default Card;
+
+//Sample APp
+
+// Import statements for React, BrowserRouter, Route, Link, Switch, and the Card component
+
+const CardList = [
+  { name: 'Card1', content: 'Content for Card1' },
+  { name: 'Card2', content: 'Content for Card2' },
+  { name: 'Card3', content: 'Content for Card3' },
+  { name: 'Card4', content: 'Content for Card4' },
+];
+
+const App = () => {
+  // ... (rest of the code remains unchanged)
+
+  <Switch>
+    {CardList.map((card, index) => (
+      <Route key={index} path={`/card/${index + 1}`}>
+        <Card cardName={card.name} cardContent={card.content} />
+        <div>
+          {index > 0 && (
+            <Link to={`/card/${index}`}>&lt; Previous</Link>
+          )}
+          {index < CardList.length - 1 && (
+            <Link to={`/card/${index + 2}`}>Next &gt;</Link>
+          )}
+        </div>
+      </Route>
+    ))}
+    <Route path="/">
+      <h1>Welcome to the App</h1>
+    </Route>
+  </Switch>
+
+  // ... (rest of the code remains unchanged)
+};
