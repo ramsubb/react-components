@@ -1,0 +1,131 @@
+App1 - Host Application
+npm init -y
+npm install react react-dom webpack webpack-cli webpack-dev-server @types/react @types/react-dom ts-loader typescript
+
+2.Create tsconfig.json file:
+
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "es2015"],
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "noImplicitAny": false,
+    "types": ["webpack-env"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
+
+Create webpack.config.js file:
+
+const ModuleFederationPlugin = require('webpack').container.ModuleFederationPlugin;
+
+module.exports = {
+  entry: './src/index.tsx',
+  output: {
+    publicPath: 'http://localhost:3001/', // Change this according to your setup
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
+        use: 'ts-loader',
+      },
+    ],
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js'],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app1',
+      library: { type: 'var', name: 'app1' },
+      remotes: {
+        app2: 'app2',
+      },
+      exposes: {
+        './App1Component': './src/App1Component',
+      },
+    }),
+  ],
+  devServer: {
+    port: 3001,
+  },
+};
+
+
+Create src/App1Component.tsx file:
+
+import React from 'react';
+
+const App1Component: React.FC = () => {
+  return <div>This is the App1 Component</div>;
+};
+
+export default App1Component;
+
+
+Create src/index.tsx file:
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App1Component from './App1Component';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App1Component />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+App2 - Remote Application
+
+Repeat steps 1-3 for creating the second application (app2), making sure to change the port number in webpack.config.js for devServer to a different port (e.g., 3002).
+
+
+Create src/App2Component.tsx file:
+
+import React from 'react';
+
+const App2Component: React.FC = () => {
+  const App1Component = React.lazy(() => import('app1/App1Component'));
+
+  return (
+    <div>
+      <div>This is the App2 Component</div>
+      <React.Suspense fallback="Loading App1Component...">
+        <App1Component />
+      </React.Suspense>
+    </div>
+  );
+};
+
+export default App2Component;
+
+
+Create src/index.tsx file:
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App2Component from './App2Component';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App2Component />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+
+Now, when you run both applications (app1 and app2) using their respective npm start commands, you should be able to see app2 loading and displaying the App1Component from app1 dynamically using Module Federation.
+
+
+
