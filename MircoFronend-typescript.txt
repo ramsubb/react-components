@@ -1,0 +1,160 @@
+Absolutely, you can certainly structure your microfrontends in a way that allows them to be loaded dynamically at runtime by the Shell. This approach is often referred to as "Dynamic Module Federation" and can be achieved without a build-time integration.
+
+Here's an updated structure to illustrate how you could organize your projects without hard dependencies:
+
+microfrontend-shell/
+|-- src/
+|   |-- components/
+|       |-- Shell.jsx
+|   |-- index.js
+|   |-- App.css
+|   |-- App.js
+|-- package.json
+|-- yarn.lock
+|-- public/
+    |-- index.html
+
+product-microfrontend/
+|-- src/
+|   |-- components/
+|       |-- ProductMicrofrontend.jsx
+|   |-- index.js
+|   |-- App.css
+|   |-- App.js
+|-- package.json
+|-- yarn.lock
+|-- public/
+    |-- index.html
+
+cart-microfrontend/
+|-- src/
+|   |-- components/
+|       |-- CartMicrofrontend.jsx
+|   |-- index.js
+|   |-- App.css
+|   |-- App.js
+|-- package.json
+|-- yarn.lock
+|-- public/
+    |-- index.html
+
+
+
+
+
+In this structure:
+
+Each microfrontend project (product-microfrontend, cart-microfrontend) remains independent with its own development environment and dependencies.
+The Shell component dynamically loads the microfrontends at runtime without explicit dependencies on them.
+Shell (microfrontend-shell)
+
+// microfrontend-shell/src/components/Shell.tsx
+import React, { useState, useEffect, ReactElement } from 'react';
+
+const Shell: React.FC = () => {
+  const [selectedMicrofrontend, setSelectedMicrofrontend] = useState<ReactElement | null>(null);
+
+  useEffect(() => {
+    const loadMicrofrontend = async (microfrontend: string): Promise<void> => {
+      const { default: Microfrontend } = await import(
+        `../${microfrontend}-microfrontend/src/components/${microfrontend}Microfrontend`
+      );
+      setSelectedMicrofrontend(<Microfrontend />);
+    };
+
+    // Example: Load Product Microfrontend by default
+    loadMicrofrontend('product');
+  }, []);
+
+  return (
+    <div>
+      <h1>Microfrontend Shell</h1>
+      {selectedMicrofrontend}
+    </div>
+  );
+};
+
+export default Shell;
+
+
+
+// product-microfrontend/src/components/ProductMicrofrontend.tsx
+import React from 'react';
+
+const ProductMicrofrontend: React.FC = () => {
+  return (
+    <div>
+      <h2>Product Microfrontend</h2>
+      {/* Your product-related components and logic */}
+    </div>
+  );
+};
+
+export default ProductMicrofrontend;
+
+
+// cart-microfrontend/src/components/CartMicrofrontend.tsx
+import React from 'react';
+
+const CartMicrofrontend: React.FC = () => {
+  return (
+    <div>
+      <h2>Cart Microfrontend</h2>
+      {/* Your cart-related components and logic */}
+    </div>
+  );
+};
+
+export default CartMicrofrontend;
+
+
+
+microfrontend-shell/tsconfig.json
+json
+Copy code
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react"
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.js"]
+}
+
+
+
+product-microfrontend/tsconfig.json
+json
+Copy code
+{
+  "compilerOptions": {
+    // Similar to shell tsconfig.json
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.js"]
+}
+
+
+cart-microfrontend/tsconfig.json
+json
+Copy code
+{
+  "compilerOptions": {
+    // Similar to shell tsconfig.json
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.js"]
+}
+
+
+Ensure that you've added TypeScript dependencies (typescript and @types/react, @types/react-dom) to each package.json and run npm install or yarn install in each project directory.
+
+This TypeScript configuration should help you integrate TypeScript into your microfrontend architecture.
