@@ -1,0 +1,46 @@
+import React, { Suspense } from 'react';
+
+const LazyComponent = React.lazy(() => import('./LazyComponent'));
+
+// ErrorBoundary component to catch errors
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // You can log the error here, or send it to an error reporting service
+    console.error('Error caught by error boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // Fallback UI when an error occurs
+      return <div>Oops! Something went wrong.</div>;
+    }
+
+    // Render children normally
+    return this.props.children;
+  }
+}
+
+function App() {
+  return (
+    <div>
+      <h1>My App</h1>
+      <ErrorBoundary>
+        <Suspense fallback={<div>Loading...</div>}>
+          <LazyComponent />
+        </Suspense>
+      </ErrorBoundary>
+    </div>
+  );
+}
+
+export default App;
