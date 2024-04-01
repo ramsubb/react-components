@@ -1,0 +1,42 @@
+import React, { useEffect, useState } from 'react';
+
+function MyComponent() {
+  const [params, setParams] = useState({});
+
+  useEffect(() => {
+    // Function to parse query parameters from URL
+    const parseParamsFromUrl = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const paramsObject = {};
+      for (const [key, value] of searchParams.entries()) {
+        paramsObject[key] = value;
+      }
+      return paramsObject;
+    };
+
+    // Set initial params
+    setParams(parseParamsFromUrl());
+
+    // Update params when URL changes
+    const handleUrlChange = () => {
+      setParams(parseParamsFromUrl());
+    };
+
+    // Add event listener for URL changes
+    window.addEventListener('popstate', handleUrlChange);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+    };
+  }, []);
+
+  return (
+    <div>
+      <h1>Variable 1: {params.variable1}</h1>
+      <h1>Variable 2: {params.variable2}</h1>
+    </div>
+  );
+}
+
+export default MyComponent;
