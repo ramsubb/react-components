@@ -1,0 +1,154 @@
+// my-single-spa-app/src/index.tsx
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { registerApplication, start } from 'single-spa';
+import App from './App';
+
+// Register micro-frontends
+registerApplication(
+  'main-app',
+  () => import('http://localhost:3000/main-app/src/index.tsx'),
+  (location) => location.pathname === '/' || location.pathname.startsWith('/main')
+);
+
+registerApplication(
+  'remote-app',
+  () => import('http://localhost:3002/remoteEntry.js'),
+  () => true
+);
+
+// Start SingleSPA
+start();
+
+// Render the root component
+ReactDOM.render(<App />, document.getElementById('root'));
+
+
+Contents of my-single-spa-app/src/App.tsx:
+
+tsx Copy code
+// my-single-spa-app/src/App.tsx
+
+import React from 'react';
+
+const App: React.FC = () => {
+  return (
+    <div>
+      <h1>My SingleSPA App</h1>
+      <div id="main-app" />
+      <div id="remote-app" />
+    </div>
+  );
+};
+
+export default App;
+
+
+Contents of my-single-spa-app/public/index.html:
+
+
+<!-- my-single-spa-app/public/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My SingleSPA App</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+
+
+Contents of my-single-spa-app/package.json:
+
+json
+Copy code
+// my-single-spa-app/package.json
+
+{
+  "name": "my-single-spa-app",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "single-spa": "^5.9.0"
+  },
+  "scripts": {
+    "start": "webpack serve --config webpack.config.js",
+    "build": "webpack --config webpack.config.js"
+  }
+}
+
+Contents of my-single-spa-app/tsconfig.json:
+
+json
+Copy code
+// my-single-spa-app/tsconfig.json
+
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "esnext",
+    "jsx": "react",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+  "include": ["src"]
+}
+
+
+Contents of my-single-spa-app/webpack.config.js:
+
+js
+Copy code
+// my-single-spa-app/webpack.config.js
+
+const { ModuleFederationPlugin } = require('webpack').container;
+
+module.exports = {
+  entry: './src/index.tsx',
+  output: {
+    filename: 'main.js',
+    publicPath: 'http://localhost:3000/',
+    chunkFilename: '[id].[contenthash].js',
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'mySingleSPAApp',
+      remotes: {
+        'remote-app': 'remoteApp@http://localhost:3002/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+};
+These files set up my-single-spa-app as the orchestrator application using SingleSPA. It dynamically loads main-app and remote-app and mounts them in the appropriate places within the SingleSPA application. Adjust paths and configurations as needed based on your project's specific requirements and file structure.
+
