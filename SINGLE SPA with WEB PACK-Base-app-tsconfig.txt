@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es5",                    // Specify ECMAScript target version
+    "module": "commonjs",               // Specify module code generation
+    "lib": ["es6", "dom"],              // Specify library files to be included
+    "jsx": "react",                     // Specify JSX mode (react, preserve, or react-native)
+    "strict": true,                     // Enable all strict type-checking options
+    "esModuleInterop": true,            // Enable/disable emitting esModuleInterop-compatible code
+    "skipLibCheck": true,               // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Enforce consistent casing in file names
+    "strictNullChecks": true,           // Enable strict null checks
+    "strictFunctionTypes": true,        // Enable strict checking of function types
+    "strictPropertyInitialization": true, // Enable strict checking of property initialization
+    "noImplicitAny": true,              // Raise error on expressions and declarations with an implied 'any' type
+    "noUnusedLocals": true,             // Report errors on unused locals
+    "noUnusedParameters": true,         // Report errors on unused parameters
+    "baseUrl": ".",                     // Base directory to resolve non-relative module names
+    "paths": {
+      "@/*": ["src/*"]                  // Path mapping for module resolution
+    }
+  },
+  "include": ["src"],                   // Specify files to be included in compilation
+  "exclude": ["node_modules"]           // Specify files to be excluded from compilation
+}
