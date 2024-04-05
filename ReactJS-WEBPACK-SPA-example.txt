@@ -1,0 +1,320 @@
+To create a ReactJS application using SingleSPA with Webpack Module Federation and TypeScript, you'll need to set up multiple projects: a host application and a remote application. Here's a basic example to get you started:
+
+Setup Host Application: This will be the main application that loads and orchestrates multiple remote applications.
+
+Setup Remote Application: This will be a standalone React application that will be loaded into the host application.
+
+Let's start with the host application:
+
+Host Application
+Create a new directory for your host application:
+
+
+Step-1>
+mkdir host-app
+cd host-app
+Step-2->
+Initialize a new npm project:
+npm init -y
+
+Step-3->
+
+npm install react react-dom single-spa single-spa-react @types/react @types/react-dom --save
+npm install webpack webpack-cli webpack-dev-server html-webpack-plugin @types/webpack-env --save-dev
+
+Step-4->Create a webpack.config.js file in the root directory of your project:
+
+const { ModuleFederationPlugin } = require("webpack").container;
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
+
+module.exports = {
+  entry: "./src/index.js",
+  output: {
+    publicPath: "http://localhost:8080/",
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js", ".json"],
+  },
+  devServer: {
+    port: 8080,
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "hostApp",
+      remotes: {
+        remoteApp: "remoteApp@http://localhost:3000/remoteEntry.js",
+      },
+      shared: ["react", "react-dom"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+  ],
+};
+
+Step-5->Create the src/index.js file:
+
+
+import { registerApplication, start } from "single-spa";
+import React from "react";
+import ReactDOM from "react-dom";
+import singleSpaReact from "single-spa-react";
+import App from "./App";
+
+const reactLifecycles = singleSpaReact({
+  React,
+  ReactDOM,
+  rootComponent: App,
+  domElementGetter: () => document.getElementById("app-container"),
+});
+
+registerApplication({
+  name: "reactApp",
+  app: () => import("./App"),
+  activeWhen: ["/"],
+});
+
+start();
+
+Step-6->
+Create the public/index.html file:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host Application</title>
+</head>
+<body>
+    <div id="app-container"></div>
+</body>
+</html>
+
+
+
+Remote Application
+Step-1 Create a new directory for your remote application:
+mkdir remote-app
+cd remote-app
+Initialize a new npm project:
+
+npm init -y
+
+
+Install necessary dependencies:
+
+
+npm install react react-dom @types/react @types/react-dom --save
+npm install webpack webpack-cli @types/webpack-env --save-dev
+
+Create a webpack.config.js file in the root directory of your project:
+
+
+const { ModuleFederationPlugin } = require("webpack").container;
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
+
+module.exports = {
+  entry: "./src/index.js",
+  output: {
+    publicPath: "http://localhost:3000/",
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js", ".json"],
+  },
+  devServer: {
+    port: 3000,
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "remoteApp",
+      library: { type: "var", name: "remoteApp" },
+      filename: "remoteEntry.js",
+      exposes: {
+        "./App": "./src/App",
+      },
+      shared: ["react", "react-dom"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+  ],
+};
+
+
+Create the src/index.js file:
+
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+
+
+Create the src/App.js file:
+
+import React from "react";
+
+const App = () => {
+  return (
+    <div>
+      <h1>Remote App</h1>
+    </div>
+  );
+};
+
+Create the public/index.html file:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Application</title>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
+
+Running the Applications
+Start the host application:
+bash
+Copy code
+cd host-app
+npm start
+Start the remote application:
+bash
+Copy code
+cd remote-app
+npm start
+Now you should be able to access the host application at http://localhost:8080 and see the remote application embedded within it.
+
+
+
+TYPES SCRIPT
+
+Host Application
+Modify webpack.config.js in the host application to handle TypeScript files:
+javascript
+Copy code
+const { ModuleFederationPlugin } = require("webpack").container;
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
+
+module.exports = {
+  entry: "./src/index.tsx",
+  output: {
+    publicPath: "http://localhost:8080/",
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js", ".json"],
+  },
+  devServer: {
+    port: 8080,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "ts-loader",
+        },
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "hostApp",
+      remotes: {
+        remoteApp: "remoteApp@http://localhost:3000/remoteEntry.js",
+      },
+      shared: ["react", "react-dom"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+  ],
+};
+
+
+Rename src/index.js to src/index.tsx and update the content to use TypeScript syntax:
+tsx
+Copy code
+import { registerApplication, start } from "single-spa";
+import React from "react";
+import ReactDOM from "react-dom";
+import singleSpaReact from "single-spa-react";
+import App from "./App";
+
+const reactLifecycles = singleSpaReact({
+  React,
+  ReactDOM,
+  rootComponent: App,
+  domElementGetter: () => document.getElementById("app-container"),
+});
+
+registerApplication({
+  name: "reactApp",
+  app: () => import("./App"),
+  activeWhen: ["/"],
+});
+
+start();
+
+Remote Application
+Modify webpack.config.js in the remote application to handle TypeScript files:
+javascript
+Copy code
+const { ModuleFederationPlugin } = require("webpack").container;
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
+
+module.exports = {
+  entry: "./src/index.tsx",
+  output: {
+    publicPath: "http://localhost:3000/",
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js", ".json"],
+  },
+  devServer: {
+    port: 3000,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "ts-loader",
+        },
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "remoteApp",
+      library: { type: "var", name: "remoteApp" },
+      filename: "remoteEntry.js",
+      exposes: {
+        "./App": "./src/App",
+      },
+      shared: ["react", "react-dom"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+  ],
+};
+Rename src/index.js to src/index.tsx and update the content to use TypeScript syntax:
+tsx
+Copy code
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(<App />, document.getElementById("root"));
+By using index.tsx files, you're leveraging TypeScript for both the host and remote applications, providing type safety and better development experience.
